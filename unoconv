@@ -477,6 +477,8 @@ fmts.add('graphics', 'emf', 'emf', 'Enhanced Metafile', 'draw_emf_Export')  # 15
 fmts.add('graphics', 'eps', 'eps', 'Encapsulated PostScript', 'draw_eps_Export')  # 48
 fmts.add('graphics', 'fodg', 'fodg', 'OpenDocument Drawing (Flat XML)', 'OpenDocument Drawing Flat XML')
 fmts.add('graphics', 'gif', 'gif', 'Graphics Interchange Format', 'draw_gif_Export')  # 30
+fmts.add('graphics', 'heic', 'heic', 'High Efficiency Image File Format', 'heic')
+fmts.add('graphics', 'heif', 'heif', 'High Efficiency Image File Format', 'heif')
 fmts.add('graphics', 'html', 'html', 'HTML Document (OpenOffice.org Draw)', 'draw_html_Export')  # 37
 fmts.add('graphics', 'jpg', 'jpg', 'Joint Photographic Experts Group', 'draw_jpg_Export')  # 3
 fmts.add('graphics', 'jpeg', 'jpeg', 'Joint Photographic Experts Group', 'draw_jpg_Export')  # 3
