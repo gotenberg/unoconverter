@@ -586,11 +586,12 @@ class Options:
         self.userProfile = None
         self.updateDocMode = NO_UPDATE
         self.updatehtmllinks = True
+        self.updateIndexes = True
 
         # Get options from the commandline
         try:
             opts, args = getopt.getopt(args, 'c:Dd:e:F:f:hi:I:LlM:no:p:s:T:t:P:vV',
-                ['disable-html-update-links', 'connection=', 'debug', 'doctype=', 'export=', 'field=', 'format=',
+                ['disable-update-indexes', 'disable-html-update-links', 'connection=', 'debug', 'doctype=', 'export=', 'field=', 'format=',
                  'help', 'import=', 'import-filter-name=', 'listener', 'meta=', 'no-launch',
                  'output=', 'outputpath', 'password=', 'pipe=', 'port=', 'preserve',
                  'server=', 'timeout=', 'user-profile=', 'show', 'stdin',
@@ -684,6 +685,8 @@ class Options:
                 self.template = arg
             elif opt in ['--disable-html-update-links']:
                 self.updatehtmllinks = False
+            elif opt in ['--disable-update-indexes']:
+                self.updateIndexes = False
             elif opt in ['-T', '--timeout']:
                 self.timeout = int(arg)
             elif opt in ['--unsafe-quiet-update']:
@@ -817,8 +820,9 @@ unoconv options:
                                           eg. -P PaperOrientation=landscape
                                         PaperSize: specify printer paper size, paper format should set to USER, size=widthxheight
                                           eg. -P PaperSize=130x200 means width=130, height=200
-  --disable-html-update-links   disables the recheck for updating links missed by libreoffice
+  --disable-html-update-links         disables the recheck for updating links missed by libreoffice
   --user-profile=path                 use a custom user profile path
+  --disable-update-indexes            disable the update of indexes before conversion
 ''', file=sys.stderr)
 
 
@@ -1082,21 +1086,22 @@ class Convertor:
                     user_props.setPropertyValue(prop, value)
 
             # Update document indexes
-            phase = "update-indexes"
-            for ii in range(2):
-                # At first, update Table-of-Contents.
-                # ToC grows, so page numbers grow too.
-                # On second turn, update page numbers in ToC.
-                try:
-                    document.refresh()
-                    indexes = document.getDocumentIndexes()
-                except AttributeError:
-                    # The document doesn't implement the XRefreshable and/or
-                    # XDocumentIndexesSupplier interfaces
-                    break
-                else:
-                    for i in range(0, indexes.getCount()):
-                        indexes.getByIndex(i).update()
+            if op.updateIndexes:
+                phase = "update-indexes"
+                for ii in range(2):
+                    # At first, update Table-of-Contents.
+                    # ToC grows, so page numbers grow too.
+                    # On second turn, update page numbers in ToC.
+                    try:
+                        document.refresh()
+                        indexes = document.getDocumentIndexes()
+                    except AttributeError:
+                        # The document doesn't implement the XRefreshable and/or
+                        # XDocumentIndexesSupplier interfaces
+                        break
+                    else:
+                        for i in range(0, indexes.getCount()):
+                            indexes.getByIndex(i).update()
 
             info(1, "Selected output format: %s" % outputfmt)
             info(2, "Selected office filter: %s" % outputfmt.filter)
