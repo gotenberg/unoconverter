@@ -846,8 +846,6 @@ class Convertor:
         # And some more LibreOffice magic
         unosvcmgr = unocontext.ServiceManager
         self.desktop = unosvcmgr.createInstanceWithContext("com.sun.star.frame.Desktop", unocontext)
-        self.cwd = unohelper.systemPathToFileUrl(os.getcwd())
-
         # List all filters
         # self.filters = unosvcmgr.createInstanceWithContext("com.sun.star.document.FilterFactory", unocontext)
         # for filter in self.filters.getElementNames():
@@ -1013,7 +1011,7 @@ class Convertor:
                 inputprops += UnoProps(InputStream=inputStream)
                 inputurl = 'private:stream'
             elif os.path.exists(inputfn):
-                inputurl = unohelper.absolutize(self.cwd, unohelper.systemPathToFileUrl(inputfn))
+                inputurl = unohelper.systemPathToFileUrl(os.path.abspath(inputfn))
             else:
                 inputurl = inputfn
             document = self.desktop.loadComponentFromURL(inputurl, "_blank", 0, inputprops)
@@ -1027,7 +1025,7 @@ class Convertor:
                 if os.path.exists(op.template):
                     info(1, "Template file: %s" % op.template)
                     templateprops = UnoProps(OverwriteStyles=True)
-                    templateurl = unohelper.absolutize(self.cwd, unohelper.systemPathToFileUrl(op.template))
+                    templateurl = unohelper.systemPathToFileUrl(os.path.abspath(op.template))
                     document.StyleFamilies.loadStylesFromURL(templateurl, templateprops)
                 else:
                     print('unoconv: template file `%s\' does not exist.' % op.template, file=sys.stderr)
@@ -1168,7 +1166,7 @@ class Convertor:
                 else:
                     outputfn = realpath(inbase + os.extsep + outputfmt.extension)
 
-                outputurl = unohelper.absolutize(self.cwd, unohelper.systemPathToFileUrl(outputfn))
+                outputurl = unohelper.systemPathToFileUrl(os.path.abspath(outputfn))
 
             info(1, "Output file: %s" % outputurl)
 
