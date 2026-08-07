@@ -1194,11 +1194,16 @@ class Convertor:
             try:
                 document.storeToURL(outputurl, tuple(outputprops))
             except IOException as e:
-                raise UnoException("Unable to store document to %s (Error %s)\n\nProperties: %s" % (outputurl, e.value, outputprops), None)
+                # Every other handler reads .Message; .value does not exist on a
+                # UNO exception, and the AttributeError it raises is not caught
+                # by any except clause below, so it would escape as a traceback
+                # instead of an exit code.
+                raise UnoException("Unable to store document to %s (Error %s)\n\nProperties: %s" % (outputurl, e.Message, outputprops), None)
 
             phase = "dispose"
             document.dispose()
             document.close(True)
+            document = None
             if not op.stdout and op.preserve:
                 self.preserve(inputfn, outputfn)
 
@@ -1229,17 +1234,28 @@ class Convertor:
             exitcode = 4
 
         except UnoException as e:
+            # An ErrCode is diagnostic detail, never an exit status: sys.exit
+            # truncates it modulo 256, where it would collide with the codes
+            # above. Report it, then fall through to 5 or 2.
             if hasattr(e, 'ErrCode'):
                 error("unoconv: UnoException during %s phase in %s (ErrCode %d)" % (phase, repr(e.__class__), e.ErrCode))
-                exitcode = e.ErrCode
-                pass
+
             if hasattr(e, 'Message'):
                 error("unoconv: UnoException during %s phase:\n%s" % (phase, e.Message))
                 exitcode = 5
             else:
                 error("unoconv: UnoException during %s phase in %s" % (phase, repr(e.__class__)))
                 exitcode = 2
-                pass
+
+        finally:
+            # A failure anywhere above leaves the document loaded in the office
+            # process, which outlives this script and holds that memory until it
+            # is restarted. Release it on the error paths too.
+            if document is not None:
+                try:
+                    document.dispose()
+                except Exception as e:
+                    error("unoconv: failed to release the document after an unsuccessful conversion:\n%s" % e)
 
 
 class Listener:
