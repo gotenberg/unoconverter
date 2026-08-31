@@ -16,7 +16,6 @@
 
 from __future__ import print_function
 
-from distutils.version import LooseVersion
 import getopt
 import glob
 import os
@@ -873,10 +872,7 @@ class Convertor:
             info(3, "Launching our own listener using %s." % office.binary)
             try:
                 product = self.svcmgr.createInstance("com.sun.star.configuration.ConfigurationProvider").createInstanceWithArguments("com.sun.star.configuration.ConfigurationAccess", UnoProps(nodepath="/org.openoffice.Setup/Product"))
-                if product.ooName not in ('LibreOffice', 'LOdev') or LooseVersion(product.ooSetupVersion) <= LooseVersion('3.3'):
-                    args = [office.binary, "-headless", "-invisible", "-nocrashreport", "-nodefault", "-nofirststartwizard", "-nologo", "-norestore", "-accept=%s" % op.connection]
-                else:
-                    args = [office.binary, "--headless", "--invisible", "--nocrashreport", "--nodefault", "--nofirststartwizard", "--nologo", "--norestore", "--accept=%s" % op.connection]
+                args = [office.binary, "--headless", "--invisible", "--nocrashreport", "--nodefault", "--nofirststartwizard", "--nologo", "--norestore", "--accept=%s" % op.connection]
                 if op.userProfile:
                     args.append("-env:UserInstallation=file://" + realpath(op.userProfile))
                 info(2, '%s listener arguments are %s.' % (product.ooName, args))
